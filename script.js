@@ -1,105 +1,90 @@
-// Assignment Code
-var generateBtn = document.querySelector("#generate");
+// Assignment code here
 
-//Validate the user input
-function getPasswordOptions(userNumCharacters) {
-  if (isNaN(userNumCharacters)) {
-    alert("Please enter a valid number.");
-    return false;
-  } else if (parseInt(userNumCharacters) < 8) {
-    alert("Password length must be at least 8 characters.");
-    return false;
-  } else if (parseInt(userNumCharacters) >= 128) {
-    alert("Password must be less than 129 characters.");
-    return false;
-  }
-  return true;
-}
-
-//Get random characters from each chosen character type
-function getRandomElementFromArray(collection) {
-  return collection[Math.floor(Math.random() * collection.length)];
-}
-
-//Function to prompt user for password options
 function generatePassword() {
-  var userNumCharacters = prompt(
-    "How many characters do you want your password to contain?"
-  );
-  var passwordValid = getPasswordOptions(userNumCharacters);
-  if (passwordValid) {
-    var hasSpecialCharacters = confirm(
-      "Click OK to confirm special characters."
-    );
-    var hasNumbers = confirm("Click OK to confirm adding numeric characters.");
-    var hasLowerCase = confirm(
-      "Click OK to confirm adding lowercase characters."
-    );
-    var hasUpperCase = confirm(
-      "Click OK to confirm including uppercase characters."
-    );
-  }
-  //Conditional statement to check if user does not include any types of characters. Password generator ends if all four variables evaluate to false
-  if (
-    [hasSpecialCharacters, hasNumbers, hasLowerCase, hasUpperCase].includes(
-      true
-    )
-  )
-    //Array to store types of characters to include in password
-    var chosenChar = [];
+  // I created each character set separately as an array and depending on the user's answer choices, I will append the set to a blank array that I created.
+  var lowerCaseSet = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"];
+  var upperCaseSet = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"];
+  var numSet = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"];
+  var specialSet = ["!", "@", "#", "$", "%", "^", "&", "*", "(", ")", "+", "?", "/", "-", ":", ";", "[", "]", "{", "}", ".", "<", ">", "=", "_", "`", "|", "~"];
+  var selectedArray = [];
 
-  //Array to contain one of each type of chosen character to ensure each will be used
-  var guaranteedChar = [];
+  var passwordLength = getPasswordLength();
 
-  //Conditional statements that add array of each type of character into array of possible characters based on user input and pushes new random character to guaranteedCharacters.
-  if (hasSpecialCharacters) {
-    chosenChar = chosenChar.concat(specialCharacters);
-    guaranteedChar.push(
-      specialCharacters[Math.floor(Math.random() * specialCharacters.length)]
-    );
-  }
-  if (hasNumbers) {
-    chosenChar = chosenChar.concat(numericCharacters);
-    guaranteedChar.push(
-      numericCharacters[Math.floor(Math.random() * numericCharacters.length)]
-    );
-  }
-  if (hasLowerCase) {
-    chosenChar = chosenChar.concat(lowerCasedCharacters);
-    guaranteedChar.push(
-      lowerCasedCharacters[
-        Math.floor(Math.random() * lowerCasedCharacters.length)
-      ]
-    );
-  }
-  if (hasUpperCase) {
-    chosenChar = chosenChar.concat(upperCasedCharacters);
-    guaranteedChar.push(
-      upperCasedCharacters[
-        Math.floor(Math.random() * upperCasedCharacters.length)
-      ]
-    );
-  }
-
-  //For loop to iterate over the password length from the options object, selecting random indices from the array of possible characters and concatenating those characters into the result variable
-  var randomChar = [];
-  for (var i = 0; i < userNumCharacters; i++) {
-    var index = Math.floor(Math.random() * chosenChar.length);
-    randomChar.push(chosenChar[index]);
-  }
-  var replacedPosition = {};
-  //While loop to ensure an index position that has already been replaced with a guaranteed character is not replaced with another guaranteed character.
-  while (guaranteedChar.length > 0) {
-    var replaceChar = Math.floor(Math.random() * randomChar.length);
-    if (!replacedPosition[replaceChar]) {
-      randomChar[replaceChar] = guaranteedChar.pop();
-      replacedPosition[replaceChar] = true;
+  var charTypeSelected = false;
+  // This loop ensures the user selects at least one character type
+  while (charTypeSelected == false) {
+    var lowerCase = getChoice("lowercase");
+    var upperCase = getChoice("uppercase");
+    var numericCharacters = getChoice("numeric");
+    var specialCharacters = getChoice("special");
+    if ((lowerCase) || (upperCase) || (numericCharacters) || (specialCharacters)) {
+      charTypeSelected = true;
+    } else {
+      window.alert("You must select at least one character type.")
     }
   }
-  return randomChar.join("");
+
+  // These if statements determine the user choices and then append them to the blank array I created.
+  if (lowerCase) {
+    selectedArray = selectedArray.concat(lowerCaseSet);
+  }
+  if (upperCase) {
+    selectedArray = selectedArray.concat(upperCaseSet);
+  }
+  if (numericCharacters) {
+    selectedArray = selectedArray.concat(numSet);
+  }
+  if (specialCharacters) {
+    selectedArray = selectedArray.concat(specialSet);
+  }
+
+  var passwordString = "";
+  // This loop will take the appended array, randomly select elements from it, then append the selections to a string, generating the password.
+  for (var i = 0; i < passwordLength; i++) {
+    passwordString += selectedArray[Math.floor(Math.random() * (selectedArray.length))];
+  }
+
+  return passwordString;
 }
 
-// // Write password to the #password input
+function getPasswordLength() {
+  var userChoice = 0;
+  while ((userChoice < 8) || (userChoice > 128)) {
+    userChoice = parseInt(window.prompt("Enter the number of characters between 8 and 128: "));
+
+    // Checking here to make sure the user entered a number and not a letter.
+    if (isNaN(userChoice)) {
+      // This will reset the choice value to 0 so it can restart the loop if the user entered anything besides a number.
+      userChoice = 0;
+    }
+  }
+
+  return userChoice;
+}
+
+// Created this function as the user choice options are repetitive and this simplifies the code needed.
+function getChoice(currentOption) {
+  var userChoice = "a",
+    messagePrompt = "";
+  var messagePrompt = ('Would you like '.concat(currentOption));
+  messagePrompt = messagePrompt.concat(' characters (y/n)?');
+  // This loop ensures the user enters a valid response.
+  while (userChoice = "a") {
+    userChoice = (window.prompt(messagePrompt));
+    // Added the line below for ease of usability on mobile devices as some of them automatically capitalize when entering input.
+    userChoice = userChoice.toLowerCase();
+    if (userChoice == "y") {
+      return true;
+    } else if (userChoice == "n") {
+      return false;
+    }
+  }
+}
+
+// Get references to the #generate element
+var generateBtn = document.querySelector("#generate");
+
+// Write password to the #password input
 function writePassword() {
   var password = generatePassword();
   var passwordText = document.querySelector("#password");
@@ -107,94 +92,5 @@ function writePassword() {
   passwordText.value = password;
 }
 
-// // Add event listener to generate button
+// Add event listener to generate button
 generateBtn.addEventListener("click", writePassword);
-
-// Array of special characters to be included in password
-var specialCharacters = [
-  "@",
-  "%",
-  "+",
-  "\\",
-  "/",
-  "'",
-  "!",
-  "#",
-  "$",
-  "^",
-  "?",
-  ":",
-  ",",
-  ")",
-  "(",
-  "}",
-  "{",
-  "]",
-  "[",
-  "~",
-  "-",
-  "_",
-  ".",
-];
-// Array of numeric characters to be included in password
-var numericCharacters = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"];
-
-// Array of lowercase characters to be included in password
-var lowerCasedCharacters = [
-  "a",
-  "b",
-  "c",
-  "d",
-  "e",
-  "f",
-  "g",
-  "h",
-  "i",
-  "j",
-  "k",
-  "l",
-  "m",
-  "n",
-  "o",
-  "p",
-  "q",
-  "r",
-  "s",
-  "t",
-  "u",
-  "v",
-  "w",
-  "x",
-  "y",
-  "z",
-];
-
-// Array of uppercase characters to be included in password
-var upperCasedCharacters = [
-  "A",
-  "B",
-  "C",
-  "D",
-  "E",
-  "F",
-  "G",
-  "H",
-  "I",
-  "J",
-  "K",
-  "L",
-  "M",
-  "N",
-  "O",
-  "P",
-  "Q",
-  "R",
-  "S",
-  "T",
-  "U",
-  "V",
-  "W",
-  "X",
-  "Y",
-  "Z",
-];
